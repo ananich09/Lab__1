@@ -1,1 +1,31 @@
-﻿  Lab_1.vcxproj -> E:\AAAAAA\Comp_grafic\Lab_1\x64\Debug\Lab_1.exe
+﻿  Source.cpp
+     Создается библиотека E:\AAAAAA\Comp_grafic\Lab_1\x64\Debug\Lab_1.lib и объект E:\AAAAAA\Comp_grafic\Lab_1\x64\Debug\Lab_1.exp
+LINK : warning LNK4098: библиотека по умолчанию "MSVCRT" конфликтует с использованием других библиотек; используйте /NODEFAULTLIB:library
+LINK : warning LNK4217: Символ "glewInit", определенный в "glew.obj", импортирован "Source.obj" в функции "main".
+LINK : warning LNK4217: Символ "__glewBindBuffer", определенный в "glew.obj", импортирован "Source.obj" в функции "main".
+LINK : warning LNK4217: Символ "__glewBufferData", определенный в "glew.obj", импортирован "Source.obj" в функции "main".
+LINK : warning LNK4217: Символ "__glewDeleteBuffers", определенный в "glew.obj", импортирован "Source.obj" в функции "main".
+LINK : warning LNK4217: Символ "__glewGenBuffers", определенный в "glew.obj", импортирован "Source.obj" в функции "main".
+LINK : warning LNK4217: Символ "__glewAttachShader", определенный в "glew.obj", импортирован "Source.obj" в функции ""int __cdecl createShaderProgram(char const *,char const *)" (?createShaderProgram@@YAHPEBD0@Z)".
+LINK : warning LNK4217: Символ "__glewCompileShader", определенный в "glew.obj", импортирован "Source.obj" в функции ""int __cdecl compileShader(unsigned int,char const *)" (?compileShader@@YAHIPEBD@Z)".
+LINK : warning LNK4217: Символ "__glewCreateProgram", определенный в "glew.obj", импортирован "Source.obj" в функции ""int __cdecl createShaderProgram(char const *,char const *)" (?createShaderProgram@@YAHPEBD0@Z)".
+LINK : warning LNK4217: Символ "__glewCreateShader", определенный в "glew.obj", импортирован "Source.obj" в функции ""int __cdecl compileShader(unsigned int,char const *)" (?compileShader@@YAHIPEBD@Z)".
+LINK : warning LNK4217: Символ "__glewDeleteProgram", определенный в "glew.obj", импортирован "Source.obj" в функции "main".
+LINK : warning LNK4217: Символ "__glewDeleteShader", определенный в "glew.obj", импортирован "Source.obj" в функции ""int __cdecl createShaderProgram(char const *,char const *)" (?createShaderProgram@@YAHPEBD0@Z)".
+LINK : warning LNK4217: Символ "__glewEnableVertexAttribArray", определенный в "glew.obj", импортирован "Source.obj" в функции "main".
+LINK : warning LNK4217: Символ "__glewGetProgramInfoLog", определенный в "glew.obj", импортирован "Source.obj" в функции ""int __cdecl createShaderProgram(char const *,char const *)" (?createShaderProgram@@YAHPEBD0@Z)".
+LINK : warning LNK4217: Символ "__glewGetProgramiv", определенный в "glew.obj", импортирован "Source.obj" в функции ""int __cdecl createShaderProgram(char const *,char const *)" (?createShaderProgram@@YAHPEBD0@Z)".
+LINK : warning LNK4217: Символ "__glewGetShaderInfoLog", определенный в "glew.obj", импортирован "Source.obj" в функции ""int __cdecl compileShader(unsigned int,char const *)" (?compileShader@@YAHIPEBD@Z)".
+LINK : warning LNK4217: Символ "__glewGetShaderiv", определенный в "glew.obj", импортирован "Source.obj" в функции ""int __cdecl compileShader(unsigned int,char const *)" (?compileShader@@YAHIPEBD@Z)".
+LINK : warning LNK4217: Символ "__glewGetUniformLocation", определенный в "glew.obj", импортирован "Source.obj" в функции "main".
+LINK : warning LNK4217: Символ "__glewLinkProgram", определенный в "glew.obj", импортирован "Source.obj" в функции ""int __cdecl createShaderProgram(char const *,char const *)" (?createShaderProgram@@YAHPEBD0@Z)".
+LINK : warning LNK4217: Символ "__glewShaderSource", определенный в "glew.obj", импортирован "Source.obj" в функции ""int __cdecl compileShader(unsigned int,char const *)" (?compileShader@@YAHIPEBD@Z)".
+LINK : warning LNK4217: Символ "__glewUniform1f", определенный в "glew.obj", импортирован "Source.obj" в функции "main".
+LINK : warning LNK4217: Символ "__glewUniformMatrix4fv", определенный в "glew.obj", импортирован "Source.obj" в функции "main".
+LINK : warning LNK4217: Символ "__glewUseProgram", определенный в "glew.obj", импортирован "Source.obj" в функции "main".
+LINK : warning LNK4217: Символ "__glewVertexAttribPointer", определенный в "glew.obj", импортирован "Source.obj" в функции "main".
+LINK : warning LNK4217: Символ "__glewBindVertexArray", определенный в "glew.obj", импортирован "Source.obj" в функции "main".
+LINK : warning LNK4217: Символ "__glewDeleteVertexArrays", определенный в "glew.obj", импортирован "Source.obj" в функции "main".
+LINK : warning LNK4217: Символ "__glewGenVertexArrays", определенный в "glew.obj", импортирован "Source.obj" в функции "main".
+LINK : warning LNK4217: Символ "glewExperimental", определенный в "glew.obj", импортирован "Source.obj" в функции "main".
+  Lab_1.vcxproj -> E:\AAAAAA\Comp_grafic\Lab_1\x64\Debug\Lab_1.exe

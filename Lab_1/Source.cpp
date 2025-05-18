@@ -1,6 +1,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
 #include <cmath>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
@@ -8,14 +11,46 @@
 
 using namespace std;
 
-// Камера
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-void processInput(GLFWwindow* window)
-{
-    float cameraSpeed = 0.05f;
+float yaw = -90.0f;
+float pitch = 0.0f;
+float lastX = 256.0f, lastY = 256.0f;
+bool firstMouse = true;
+const float sensitivity = 0.1f;
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    if (firstMouse) {
+        lastX = (float)xpos;
+        lastY = (float)ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = (float)(xpos - lastX);
+    float yoffset = (float)(lastY - ypos);
+    lastX = (float)xpos;
+    lastY = (float)ypos;
+
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    if (pitch > 89.0f) pitch = 89.0f;
+    if (pitch < -89.0f) pitch = -89.0f;
+
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(front);
+}
+
+void processInput(GLFWwindow* window) {
+    float cameraSpeed = 0.001f;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         cameraPos += cameraSpeed * cameraFront;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -26,46 +61,77 @@ void processInput(GLFWwindow* window)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }
 
-// Шейдеры
-const char* vertexShaderSource = R"glsl(
-#version 330 core
-layout (location = 0) in vec3 aPos;
-
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-
-void main()
-{
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
+std::string loadShaderSource(const char* filepath) {
+    std::ifstream file(filepath);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open shader file: " << filepath << std::endl;
+        return "";
+    }
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
 }
-)glsl";
 
-const char* fragmentShaderSource = R"glsl(
-#version 330 core
-out vec4 FragColor;
+int compileShader(GLenum type, const char* source) {
+    int shader = glCreateShader(type);
+    glShaderSource(shader, 1, &source, nullptr);
+    glCompileShader(shader);
 
-uniform vec4 ourColor;
-
-void main()
-{
-    FragColor = ourColor;
+    int success;
+    char infoLog[512];
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+        std::cerr << "Shader compilation error:\n" << infoLog << std::endl;
+        return 0;
+    }
+    return shader;
 }
-)glsl";
+
+int createShaderProgram(const char* vertexPath, const char* fragmentPath) {
+    std::string vertexCode = loadShaderSource(vertexPath);
+    std::string fragmentCode = loadShaderSource(fragmentPath);
+    if (vertexCode.empty() || fragmentCode.empty()) {
+        return 0;
+    }
+    
+    int vertexShader = compileShader(GL_VERTEX_SHADER, vertexCode.c_str());
+    int fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentCode.c_str());
+    if (vertexShader == 0 || fragmentShader == 0) {
+        return 0;
+    }
+
+    int program = glCreateProgram();
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
+    glLinkProgram(program);
+
+    int success;
+    char infoLog[512];
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(program, 512, nullptr, infoLog);
+        std::cerr << "Program linking error:\n" << infoLog << std::endl;
+        return 0;
+    }
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+    return program;
+}
 
 float vertices[] = {
-     0.5f,  0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-    -0.5f, -0.5f, 0.0f,
-    -0.5f,  0.5f, 0.0f
+    0.5f,  0.5f, 0.0f,
+    0.5f, -0.5f, 0.0f,
+   -0.5f, -0.5f, 0.0f,
+   -0.5f,  0.5f, 0.0f
 };
 unsigned int indices[] = {
     0, 1, 3,
     1, 2, 3
 };
 
-int main()
-{
+int main() {
     if (!glfwInit()) {
         cerr << "Failed to initialize GLFW" << endl;
         return -1;
@@ -75,7 +141,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(512, 512, "Camera with GLM", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(512, 512, "Color Changing Square", nullptr, nullptr);
     if (!window) {
         cerr << "Failed to create GLFW window" << endl;
         glfwTerminate();
@@ -93,24 +159,16 @@ int main()
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
 
-    // Создание шейдеров
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
+    int shaderProgram = createShaderProgram("Vertex.glsl", "Fragment.glsl");
+    if (shaderProgram == 0) {
+        cerr << "Failed to create shader program" << endl;
+        glfwTerminate();
+        return -1;
+    }
 
-    unsigned int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    // Настройка вершин
     unsigned int VAO, VBO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -124,37 +182,28 @@ int main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
 
-    // Главный цикл
-    while (!glfwWindowShouldClose(window))
-    {
+    while (!glfwWindowShouldClose(window)) {
         processInput(window);
 
-        glClearColor(0.9f, 0.1f, 0.2f, 1.0f);
+        // Красный фон
+        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(shaderProgram);
 
-        // Цвет фигуры
-        float timeValue = glfwGetTime();
-        float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-        int colorLoc = glGetUniformLocation(shaderProgram, "ourColor");
-        glUniform4f(colorLoc, 0.5f, greenValue, 0.5f, 1.0f);
-
-        // Матрицы трансформации
         glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 100.0f);
+        glm::mat4 projection = glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.1f, 100.f);
 
-        unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-        unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
-        unsigned int projLoc = glGetUniformLocation(shaderProgram, "projection");
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+        float timeValue = (float)glfwGetTime();
+        glUniform1f(glGetUniformLocation(shaderProgram, "time"), timeValue);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
