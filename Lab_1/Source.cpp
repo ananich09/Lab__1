@@ -123,8 +123,10 @@ int main() {
     float lastFrame = 0.0f;
 
     Shader shader("Vertex.glsl", "Fragment.glsl");
-
     Model myModel("112.obj");
+
+    // координаты источника света
+    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -141,6 +143,7 @@ int main() {
 
         shader.use();
 
+        // Матрицы трансформации
         glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         glm::mat4 projection = glm::perspective(glm::radians(fov),
@@ -149,8 +152,23 @@ int main() {
         shader.setMat4("model", model);
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
-        shader.setVec3("objectColor", glm::vec3(0.8f, 0.3f, 0.3f));
 
+        // Параметры камеры
+        shader.setVec3("viewPos", cameraPos);
+
+        // Параметры света
+        shader.setVec3("lightPos", lightPos);
+        shader.setVec3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+        shader.setVec3("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+        shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+
+        // Параметры материала модели
+        shader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+        shader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+        shader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+        shader.setFloat("material.shininess", 32.0f);
+
+        // Отрисовка модели
         myModel.Draw(shader);
 
         glfwSwapBuffers(window);
@@ -160,3 +178,4 @@ int main() {
     glfwTerminate();
     return 0;
 }
+
