@@ -9,6 +9,15 @@
 
 #include <iostream>
 
+
+// переменные для вращения
+glm::mat4 rotate_x1(1.0);
+glm::mat4 rotate_x2(1.0);
+glm::mat4 rotate_x3(1.0);
+float angl_x1;
+float angl_x2;
+float angl_x3;
+
 // настройки окна
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -37,6 +46,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 // функция обработки клавиатуры
 void processInput(GLFWwindow* window, float deltaTime) {
     float velocity = cameraSpeed * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         cameraPos += velocity * cameraFront;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -45,6 +57,56 @@ void processInput(GLFWwindow* window, float deltaTime) {
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * velocity;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * velocity;
+
+    if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
+    {
+        float NewAngl = angl_x1 - deltaTime * 50;
+        rotate_x1 = glm::rotate(glm::mat4 (1.0), glm::radians(NewAngl), glm::vec3(0.0, 1.0, 0.0));
+        angl_x1 = NewAngl;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
+    {
+        float NewAngl = angl_x1 + deltaTime * 50;
+        rotate_x1 = glm::rotate(glm::mat4(1.0), glm::radians(NewAngl), glm::vec3(0.0, 1.0, 0.0));
+        angl_x1 = NewAngl;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+    {
+        if (angl_x2 > -120) {
+            float NewAngl = angl_x2 - deltaTime * 50;
+            rotate_x2 = glm::rotate(glm::mat4(1.0), glm::radians(NewAngl), glm::vec3(0.0, 0.0, 1.0));
+            angl_x2 = NewAngl;
+        }
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+    {
+        if (angl_x2 < 60) {
+            float NewAngl = angl_x2 + deltaTime * 50;
+            rotate_x2 = glm::rotate(glm::mat4(1.0), glm::radians(NewAngl), glm::vec3(0.0, 0.0, 1.0));
+            angl_x2 = NewAngl;
+        }
+    }
+    
+    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
+    {
+        if (angl_x3 > -180) {
+            float NewAngl = angl_x3 - deltaTime * 50;
+            rotate_x3 = glm::rotate(glm::mat4(1.0), glm::radians(NewAngl), glm::vec3(0.0, 0.0, 1.0));
+            angl_x3 = NewAngl;
+        }
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
+    {
+        if (angl_x3 < 60) {
+            float NewAngl = angl_x3 + deltaTime * 50;
+            rotate_x3 = glm::rotate(glm::mat4(1.0), glm::radians(NewAngl), glm::vec3(0.0, 0.0, 1.0));
+            angl_x3 = NewAngl;
+        }
+    }
 }
 
 // функция обработки движения мыши
@@ -123,7 +185,7 @@ int main() {
     float lastFrame = 0.0f;
 
     Shader shader("Vertex.glsl", "Fragment.glsl");
-    Model myModel("112.obj");
+    Model myModel("112_split.obj");
 
     // координаты источника света
     glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
@@ -168,8 +230,13 @@ int main() {
         shader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
         shader.setFloat("material.shininess", 32.0f);
 
+        myModel.Draw(shader, rotate_x1, rotate_x2, rotate_x3);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPos);
+        shader.setMat4("model", model);
         // Отрисовка модели
-        myModel.Draw(shader);
+        
 
         glfwSwapBuffers(window);
         glfwPollEvents();

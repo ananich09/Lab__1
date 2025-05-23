@@ -9,16 +9,6 @@
 #include "Model.h"
 #include "Shader.h"
 
-Model::Model(const std::string& path)
-{
-    loadModel(path);
-}
-
-void Model::Draw(Shader& shader)
-{
-    for (unsigned int i = 0; i < meshes.size(); i++)
-        meshes[i].Draw(shader);
-}
 
 void Model::loadModel(const std::string& path)
 {
